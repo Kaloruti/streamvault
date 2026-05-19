@@ -660,6 +660,37 @@ footer {
   .cards-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   #hero { height: 75vh; }
 }
+
+/* Source switcher */
+#source-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.8);
+  border-bottom: 1px solid var(--border);
+}
+.src-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  color: var(--text3); text-transform: uppercase; margin-right: 4px;
+  flex-shrink: 0;
+}
+.src-label i { color: var(--purple); margin-right: 4px; }
+.src-btn {
+  padding: 5px 14px; border-radius: 50px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text2); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: var(--transition);
+  font-family: 'Outfit', sans-serif;
+}
+.src-btn:hover { background: rgba(139,92,246,0.2); color: var(--purple); border-color: var(--purple); }
+.src-btn.active {
+  background: linear-gradient(135deg, var(--blue-dark), var(--purple-dark));
+  border-color: transparent; color: white;
+}
+#src-status { margin-left: auto; font-size: 11px; color: var(--text3); }
+#modal-player-wrap iframe {
+  width: 100%; aspect-ratio: 16/9; border: none; display: block;
+}
 </style>
 </head>
 <body>
@@ -766,7 +797,16 @@ footer {
     <button id="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
     <div id="modal-backdrop"></div>
     <div id="modal-player-wrap">
-      <iframe id="modal-player" allowfullscreen allow="autoplay; fullscreen"></iframe>
+      <div id="source-bar">
+        <span class="src-label"><i class="fas fa-satellite-dish"></i> Server:</span>
+        <button class="src-btn active" onclick="switchSource(0)">Server 1</button>
+        <button class="src-btn" onclick="switchSource(1)">Server 2</button>
+        <button class="src-btn" onclick="switchSource(2)">Server 3</button>
+        <button class="src-btn" onclick="switchSource(3)">Server 4</button>
+        <button class="src-btn" onclick="switchSource(4)">Server 5</button>
+        <span id="src-status"></span>
+      </div>
+      <iframe id="modal-player" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" referrerpolicy="no-referrer"></iframe>
     </div>
     <div id="modal-body">
       <h2 class="modal-title" id="modal-title"></h2>
@@ -1067,22 +1107,52 @@ async function buildEpisodes(id, season) {
   });
 }
 
+// ── Multi-source embed ─────────────────────────
+let currentPlay = { id: null, type: null, season: 1, episode: 1 };
+
+function getSources(id, type, season, episode) {
+  if (type === 'movie') {
+    return [
+      `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
+      `https://vidsrc.cc/v2/embed/movie/${id}`,
+      `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+      `https://www.2embed.cc/embed/${id}`,
+      `https://embedder.net/e/?tmdb=${id}`,
+    ];
+  } else {
+    return [
+      `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`,
+      `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`,
+      `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`,
+      `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
+      `https://embedder.net/e/?tmdb=${id}&s=${season}&e=${episode}`,
+    ];
+  }
+}
+
 function startPlay(id, type, season, episode) {
+  currentPlay = { id, type, season, episode };
   const playerWrap = document.getElementById('modal-player-wrap');
   const backdrop = document.getElementById('modal-backdrop');
-  const player = document.getElementById('modal-player');
-
-  let src = '';
-  if (type === 'movie') {
-    src = `https://vidsrc.to/embed/movie/${id}`;
-  } else {
-    src = `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
-  }
-
-  player.src = src;
   backdrop.style.display = 'none';
   playerWrap.style.display = '';
   playerWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  switchSource(0);
+}
+
+function switchSource(idx) {
+  const { id, type, season, episode } = currentPlay;
+  const sources = getSources(id, type, season, episode);
+  const player = document.getElementById('modal-player');
+  const status = document.getElementById('src-status');
+  const btns = document.querySelectorAll('.src-btn');
+
+  btns.forEach((b, i) => b.classList.toggle('active', i === idx));
+  status.textContent = 'Loading...';
+  player.src = sources[idx] || sources[0];
+
+  // Update status after short delay
+  setTimeout(() => { status.textContent = `Server ${idx + 1} active`; }, 1500);
 }
 
 function closeModal(e) {
