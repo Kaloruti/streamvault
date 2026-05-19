@@ -467,14 +467,18 @@ button { cursor: pointer; font-family: 'Outfit', sans-serif; border: none; outli
 
 #modal-player-wrap {
   display: none;
-  width: 100%; aspect-ratio: 16/9;
+  width: 100%;
   background: #000;
   border-radius: 16px 16px 0 0; overflow: hidden;
 }
-
 #modal-player-wrap iframe {
-  width: 100%; height: 100%; border: none;
+  width: 100%;
+  height: 500px;
+  border: none;
+  display: block;
 }
+
+
 
 #modal-body { padding: 24px 28px 32px; }
 
@@ -688,9 +692,7 @@ footer {
   border-color: transparent; color: white;
 }
 #src-status { margin-left: auto; font-size: 11px; color: var(--text3); }
-#modal-player-wrap iframe {
-  width: 100%; aspect-ratio: 16/9; border: none; display: block;
-}
+
 </style>
 </head>
 <body>
@@ -1113,46 +1115,75 @@ let currentPlay = { id: null, type: null, season: 1, episode: 1 };
 function getSources(id, type, season, episode) {
   if (type === 'movie') {
     return [
-      `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
-      `https://vidsrc.cc/v2/embed/movie/${id}`,
-      `https://multiembed.mov/?video_id=${id}&tmdb=1`,
-      `https://www.2embed.cc/embed/${id}`,
-      `https://embedder.net/e/?tmdb=${id}`,
+      { label: 'VidSrc',     url: `https://vidsrc.xyz/embed/movie?tmdb=${id}` },
+      { label: 'VidSrc 2',   url: `https://vidsrc.cc/v2/embed/movie/${id}` },
+      { label: 'MultiEmbed', url: `https://multiembed.mov/?video_id=${id}&tmdb=1` },
+      { label: '2Embed',     url: `https://www.2embed.cc/embed/${id}` },
+      { label: 'Embedder',   url: `https://embedder.net/e/?tmdb=${id}` },
     ];
   } else {
     return [
-      `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`,
-      `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}`,
-      `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`,
-      `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`,
-      `https://embedder.net/e/?tmdb=${id}&s=${season}&e=${episode}`,
+      { label: 'VidSrc',     url: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${episode}` },
+      { label: 'VidSrc 2',   url: `https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}` },
+      { label: 'MultiEmbed', url: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}` },
+      { label: '2Embed',     url: `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}` },
+      { label: 'Embedder',   url: `https://embedder.net/e/?tmdb=${id}&s=${season}&e=${episode}` },
     ];
   }
 }
 
 function startPlay(id, type, season, episode) {
-  currentPlay = { id, type, season, episode };
+  // Save current play state
+  currentPlay = { id, type, season: season || 1, episode: episode || 1 };
+
   const playerWrap = document.getElementById('modal-player-wrap');
-  const backdrop = document.getElementById('modal-backdrop');
-  backdrop.style.display = 'none';
-  playerWrap.style.display = '';
-  playerWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  switchSource(0);
+  const backdrop   = document.getElementById('modal-backdrop');
+
+  // Show player, hide backdrop
+  backdrop.style.display   = 'none';
+  playerWrap.style.display = 'block';
+
+  // Rebuild source buttons dynamically
+  const sources = getSources(id, type, currentPlay.season, currentPlay.episode);
+  const bar = document.getElementById('source-bar');
+  // Remove old src-btns
+  bar.querySelectorAll('.src-btn').forEach(b => b.remove());
+  sources.forEach((src, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'src-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = src.label;
+    btn.onclick = () => switchSource(i);
+    bar.appendChild(btn);
+  });
+
+  // Load first source
+  loadSource(sources[0].url, 0);
+
+  // Scroll into view
+  setTimeout(() => {
+    playerWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
 }
 
 function switchSource(idx) {
-  const { id, type, season, episode } = currentPlay;
-  const sources = getSources(id, type, season, episode);
+  const sources = getSources(currentPlay.id, currentPlay.type, currentPlay.season, currentPlay.episode);
+  if (!sources[idx]) return;
+  document.querySelectorAll('.src-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  loadSource(sources[idx].url, idx);
+}
+
+function loadSource(url, idx) {
   const player = document.getElementById('modal-player');
   const status = document.getElementById('src-status');
-  const btns = document.querySelectorAll('.src-btn');
-
-  btns.forEach((b, i) => b.classList.toggle('active', i === idx));
-  status.textContent = 'Loading...';
-  player.src = sources[idx] || sources[0];
-
-  // Update status after short delay
-  setTimeout(() => { status.textContent = `Server ${idx + 1} active`; }, 1500);
+  status.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="margin-right:4px;color:var(--purple)"></i> Loading...';
+  // Set src
+  player.src = '';
+  setTimeout(() => {
+    player.src = url;
+    setTimeout(() => {
+      status.innerHTML = `<i class="fas fa-circle" style="color:#46d369;margin-right:4px;font-size:8px"></i> Server ${idx+1} active`;
+    }, 2000);
+  }, 80);
 }
 
 function closeModal(e) {
