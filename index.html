@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StreamVault — Watch Free Movies & TV Shows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+:root {
+  --bg: #07070f;
+  --bg2: #0d0d1a;
+  --bg3: #121220;
+  --bg4: #1a1a2e;
+  --card: #111120;
+  --card-hover: #1c1c32;
+  --blue: #4f8ef7;
+  --blue-dark: #2563eb;
+  --purple: #8b5cf6;
+  --purple-dark: #6d28d9;
+  --pink: #ec4899;
+  --accent: linear-gradient(135deg, #4f8ef7, #8b5cf6, #ec4899);
+  --accent-solid: #6d4fc7;
+  --text: #f0f0ff;
+  --text2: #9999bb;
+  --text3: #55556a;
+  --border: rgba(255,255,255,0.06);
+  --glow-blue: 0 0 30px rgba(79,142,247,0.25);
+  --glow-purple: 0 0 30px rgba(139,92,246,0.25);
+  --r: 10px;
+  --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Ambient background */
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(79,142,247,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -200px; right: -200px;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent-solid); border-radius: 10px; }
+
+a { text-decoration: none; color: inherit; }
+img { display: block; max-width: 100%; }
+button { cursor: pointer; font-family: 'Outfit', sans-serif; border: none; outline: none; }
+
+/* ══════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════ */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: 70px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5%;
+  background: rgba(7,7,15,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition);
+}
+
+.nav-logo {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  background: var(--accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.nav-tabs {
+  display: flex; gap: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 4px;
+}
+
+.nav-tab {
+  padding: 7px 20px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  background: transparent;
+  transition: var(--transition);
+  cursor: pointer;
+  border: none;
+}
+
+.nav-tab.active, .nav-tab:hover {
+  background: linear-gradient(135deg, var(--blue-dark), var(--purple-dark));
+  color: white;
+}
+
+.nav-right { display: flex; align-items: center; gap: 12px; }
+
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 8px 16px;
+  transition: var(--transition);
+}
+
+.search-box:focus-within {
+  border-color: var(--purple);
+  background: rgba(139,92,246,0.08);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.12);
+}
+
+.search-box i { color: var(--text3); font-size: 13px; }
+
+.search-box input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: 'Outfit', sans-serif;
+  font-size: 14px; width: 180px;
+}
+
+.search-box input::placeholder { color: var(--text3); }
+
+/* ══════════════════════════════════════
+   PAGES
+══════════════════════════════════════ */
+.page { display: none; padding-top: 70px; }
+.page.active { display: block; }
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+#hero {
+  position: relative;
+  height: 92vh; min-height: 600px;
+  display: flex; align-items: flex-end;
+  overflow: hidden;
+}
+
+#hero-bg {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center top;
+  transition: all 0.8s ease;
+}
+
+#hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to top, var(--bg) 0%, rgba(7,7,15,0.7) 40%, rgba(7,7,15,0.2) 100%),
+    linear-gradient(to right, rgba(7,7,15,0.85) 30%, transparent 70%);
+}
+
+#hero-content {
+  position: relative; z-index: 2;
+  padding: 0 5% 80px;
+  max-width: 620px;
+  animation: heroIn 0.8s ease both;
+}
+
+@keyframes heroIn {
+  from { opacity:0; transform: translateY(40px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+.hero-type-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, var(--blue-dark), var(--purple-dark));
+  color: white; font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 50px;
+  margin-bottom: 14px;
+}
+
+#hero-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 900; line-height: 1.05;
+  margin-bottom: 14px;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.8);
+}
+
+.hero-meta {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 10px; margin-bottom: 16px;
+  font-size: 13px; color: var(--text2); font-weight: 500;
+}
+
+.hero-meta .rating { color: #fbbf24; font-weight: 700; }
+.hero-meta .dot { width: 4px; height: 4px; background: var(--text3); border-radius: 50%; }
+.hero-meta .quality-tag {
+  background: rgba(79,142,247,0.2); border: 1px solid rgba(79,142,247,0.4);
+  color: var(--blue); font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; padding: 2px 8px; border-radius: 4px;
+}
+
+#hero-desc {
+  font-size: 15px; color: var(--text2); line-height: 1.7;
+  font-weight: 300; margin-bottom: 28px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.btn-watch {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--blue-dark), var(--purple-dark));
+  color: white; font-size: 15px; font-weight: 700;
+  padding: 14px 30px; border-radius: 50px;
+  transition: var(--transition);
+  box-shadow: 0 8px 30px rgba(79,142,247,0.35);
+}
+
+.btn-watch:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(79,142,247,0.5);
+}
+
+.btn-details {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white; font-size: 15px; font-weight: 600;
+  padding: 14px 26px; border-radius: 50px;
+  transition: var(--transition);
+}
+
+.btn-details:hover { background: rgba(255,255,255,0.14); }
+
+/* ══════════════════════════════════════
+   SECTIONS / ROWS
+══════════════════════════════════════ */
+.section { padding: 40px 5%; position: relative; z-index: 1; }
+
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 1rem; font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.section-title::before {
+  content: '';
+  display: block; width: 4px; height: 20px;
+  background: linear-gradient(to bottom, var(--blue), var(--purple));
+  border-radius: 2px;
+}
+
+.see-all {
+  font-size: 12px; font-weight: 600;
+  color: var(--purple); letter-spacing: 0.5px;
+  transition: var(--transition);
+}
+.see-all:hover { color: var(--blue); }
+
+/* Card grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.cards-grid.wide {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+/* ══════════════════════════════════════
+   MOVIE CARD
+══════════════════════════════════════ */
+.card {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--card);
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s ease;
+  animation: fadeUp 0.4s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6), var(--glow-purple);
+  z-index: 5;
+}
+
+.card-poster {
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg4);
+}
+
+.card-poster img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .card-poster img { transform: scale(1.08); }
+
+.card-poster-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--bg3), var(--bg4));
+  color: var(--text3); font-size: 13px; text-align: center; padding: 16px;
+}
+
+.card-poster-placeholder i { font-size: 2rem; color: var(--text3); }
+
+.card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(7,7,15,0.95) 0%, rgba(7,7,15,0.3) 50%, transparent 100%);
+  opacity: 0; transition: var(--transition);
+  display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 14px;
+}
+
+.card:hover .card-overlay { opacity: 1; }
+
+.card-play-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue-dark), var(--purple-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: white;
+  box-shadow: 0 4px 20px rgba(79,142,247,0.5);
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+
+.card-play-btn:hover { transform: scale(1.1); }
+
+.card-overlay-title {
+  font-size: 13px; font-weight: 700; color: white;
+  line-height: 1.3; margin-bottom: 6px;
+}
+
+.card-overlay-meta {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text2);
+}
+
+.card-overlay-meta .star { color: #fbbf24; }
+
+.card-badge {
+  position: absolute; top: 8px; left: 8px;
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  padding: 3px 8px; border-radius: 4px;
+  background: linear-gradient(135deg, var(--blue-dark), var(--purple-dark));
+  color: white;
+}
+
+.card-body {
+  padding: 10px 12px 12px;
+}
+
+.card-title {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  line-height: 1.3; margin-bottom: 4px;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.card-sub {
+  font-size: 11px; color: var(--text3);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.card-sub .star { color: #fbbf24; font-size: 10px; }
+
+/* ══════════════════════════════════════
+   MODAL / DETAIL VIEW
+══════════════════════════════════════ */
+#modal-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+#modal-overlay.open { display: flex; }
+
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+#modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%; max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: modalIn 0.3s cubic-bezier(0.4,0,0.2,1) both;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7), var(--glow-purple);
+}
+
+@keyframes modalIn {
+  from { opacity:0; transform: scale(0.94) translateY(20px); }
+  to { opacity:1; transform: scale(1) translateY(0); }
+}
+
+#modal-close {
+  position: absolute; top: 16px; right: 16px; z-index: 10;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border);
+  color: var(--text); font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+
+#modal-close:hover { background: rgba(255,255,255,0.2); }
+
+#modal-backdrop {
+  width: 100%; aspect-ratio: 16/9;
+  background-size: cover; background-position: center;
+  position: relative; border-radius: 16px 16px 0 0; overflow: hidden;
+}
+
+#modal-backdrop::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, var(--bg2) 0%, transparent 60%);
+}
+
+#modal-player-wrap {
+  display: none;
+  width: 100%; aspect-ratio: 16/9;
+  background: #000;
+  border-radius: 16px 16px 0 0; overflow: hidden;
+}
+
+#modal-player-wrap iframe {
+  width: 100%; height: 100%; border: none;
+}
+
+#modal-body { padding: 24px 28px 32px; }
+
+.modal-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 1.6rem; font-weight: 900;
+  margin-bottom: 10px; line-height: 1.2;
+}
+
+.modal-meta {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 10px; margin-bottom: 16px;
+  font-size: 13px; color: var(--text2);
+}
+
+.modal-meta .rating { color: #fbbf24; font-weight: 700; }
+.modal-meta .dot { width: 4px; height: 4px; background: var(--text3); border-radius: 50%; }
+.modal-meta .tag {
+  background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3);
+  color: var(--purple); font-size: 11px; font-weight: 600;
+  padding: 2px 10px; border-radius: 50px;
+}
+
+.modal-desc {
+  font-size: 14px; color: var(--text2); line-height: 1.75;
+  font-weight: 300; margin-bottom: 24px;
+}
+
+.modal-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+
+.btn-modal-watch {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--blue-dark), var(--purple-dark));
+  color: white; font-size: 14px; font-weight: 700;
+  padding: 12px 28px; border-radius: 50px;
+  transition: var(--transition);
+  box-shadow: 0 6px 24px rgba(79,142,247,0.35);
+}
+
+.btn-modal-watch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 35px rgba(79,142,247,0.5);
+}
+
+/* Seasons selector */
+#seasons-wrap { margin-bottom: 20px; }
+
+.seasons-label {
+  font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 10px;
+}
+
+.seasons-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+
+.season-btn {
+  padding: 6px 16px; border-radius: 50px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--text2); font-size: 12px; font-weight: 600;
+  transition: var(--transition);
+}
+
+.season-btn.active, .season-btn:hover {
+  background: linear-gradient(135deg, var(--blue-dark), var(--purple-dark));
+  border-color: transparent; color: white;
+}
+
+.episodes-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+
+.ep-btn {
+  width: 38px; height: 38px; border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--text2); font-size: 12px; font-weight: 600;
+  transition: var(--transition);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.ep-btn.active, .ep-btn:hover {
+  background: linear-gradient(135deg, var(--blue-dark), var(--purple-dark));
+  border-color: transparent; color: white;
+}
+
+/* Genres */
+.modal-genres { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.genre-chip {
+  background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.25);
+  color: var(--blue); font-size: 12px; font-weight: 600;
+  padding: 4px 14px; border-radius: 50px;
+}
+
+/* ══════════════════════════════════════
+   SEARCH RESULTS PAGE
+══════════════════════════════════════ */
+#search-page { padding: 90px 5% 60px; }
+
+.search-heading {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 1.4rem; font-weight: 700;
+  margin-bottom: 24px; color: var(--text2);
+}
+
+.search-heading span { color: var(--text); }
+
+/* ══════════════════════════════════════
+   LOADING SPINNER
+══════════════════════════════════════ */
+.spinner-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 20px; gap: 16px; color: var(--text3);
+  font-size: 14px;
+}
+
+.spinner {
+  width: 44px; height: 44px;
+  border: 3px solid var(--border);
+  border-top-color: var(--purple);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+footer {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 40px 5% 24px;
+  margin-top: 60px;
+}
+
+.footer-top {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; flex-wrap: wrap; gap: 30px;
+  margin-bottom: 30px;
+}
+
+.footer-logo {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 1.2rem; font-weight: 900;
+  background: var(--accent);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 8px;
+}
+
+.footer-desc { font-size: 13px; color: var(--text3); max-width: 280px; line-height: 1.6; }
+
+.footer-links { display: flex; gap: 40px; flex-wrap: wrap; }
+.footer-col h4 { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 8px; }
+.footer-col ul li a { font-size: 13px; color: var(--text2); transition: var(--transition); }
+.footer-col ul li a:hover { color: var(--purple); }
+
+.footer-bottom {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+  font-size: 12px; color: var(--text3);
+}
+
+.footer-bottom span { color: var(--purple); }
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 768px) {
+  .nav-tabs { display: none; }
+  .search-box input { width: 120px; }
+  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+  #modal-body { padding: 16px 18px 24px; }
+  .modal-title { font-size: 1.2rem; }
+  .footer-links { gap: 24px; }
+}
+
+@media (max-width: 480px) {
+  .cards-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  #hero { height: 75vh; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════ -->
+<nav id="nav">
+  <div class="nav-logo">StreamVault</div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showHomePage()">Home</button>
+    <button class="nav-tab" onclick="filterType('movie')">Movies</button>
+    <button class="nav-tab" onclick="filterType('tv')">TV Shows</button>
+  </div>
+
+  <div class="nav-right">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="search-input" placeholder="Search movies, shows..." autocomplete="off"/>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     HOME PAGE
+══════════════════════════════════════ -->
+<div class="page active" id="home-page">
+
+  <!-- Hero -->
+  <div id="hero">
+    <div id="hero-bg"></div>
+    <div id="hero-content">
+      <div class="hero-type-badge"><i class="fas fa-fire"></i> Trending Today</div>
+      <h1 id="hero-title">Loading...</h1>
+      <div class="hero-meta" id="hero-meta"></div>
+      <p id="hero-desc"></p>
+      <div class="hero-btns">
+        <button class="btn-watch" id="hero-watch-btn"><i class="fas fa-play"></i> Watch Now</button>
+        <button class="btn-details" id="hero-info-btn"><i class="fas fa-info-circle"></i> More Info</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trending Movies -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Trending Movies</div>
+      <a class="see-all" href="#" onclick="filterType('movie')">See All →</a>
+    </div>
+    <div class="cards-grid" id="trending-movies">
+      <div class="spinner-wrap"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Trending TV -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Popular TV Shows</div>
+      <a class="see-all" href="#" onclick="filterType('tv')">See All →</a>
+    </div>
+    <div class="cards-grid" id="trending-tv">
+      <div class="spinner-wrap"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Top Rated -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Top Rated Movies</div>
+    </div>
+    <div class="cards-grid wide" id="top-rated">
+      <div class="spinner-wrap"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Latest TV -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Latest TV Series</div>
+    </div>
+    <div class="cards-grid" id="latest-tv">
+      <div class="spinner-wrap"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     SEARCH PAGE
+══════════════════════════════════════ -->
+<div class="page" id="search-page">
+  <div class="search-heading">Results for: <span id="search-term-label"></span></div>
+  <div class="cards-grid" id="search-results">
+    <div class="spinner-wrap"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MODAL
+══════════════════════════════════════ -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal">
+    <button id="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    <div id="modal-backdrop"></div>
+    <div id="modal-player-wrap">
+      <iframe id="modal-player" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    </div>
+    <div id="modal-body">
+      <h2 class="modal-title" id="modal-title"></h2>
+      <div class="modal-meta" id="modal-meta"></div>
+      <p class="modal-desc" id="modal-desc"></p>
+      <div class="modal-actions">
+        <button class="btn-modal-watch" id="modal-watch-btn">
+          <i class="fas fa-play"></i> Watch Now
+        </button>
+      </div>
+      <div id="seasons-wrap" style="display:none">
+        <div class="seasons-label">Select Season & Episode</div>
+        <div class="seasons-row" id="seasons-row"></div>
+        <div class="episodes-row" id="episodes-row"></div>
+      </div>
+      <div class="modal-genres" id="modal-genres"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo">StreamVault</div>
+      <p class="footer-desc">Your free gateway to movies and TV shows. Powered by TMDB.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h4>Browse</h4>
+        <ul>
+          <li><a href="#" onclick="showHomePage()">Home</a></li>
+          <li><a href="#" onclick="filterType('movie')">Movies</a></li>
+          <li><a href="#" onclick="filterType('tv')">TV Shows</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Info</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>&#169; 2024 StreamVault. Data by <span>TMDB</span>.</div>
+    <div>This site does not host any video files.</div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+const API_KEY = 'a4f655b9d619883c1c3bdea971bf34e9';
+const BASE = 'https://api.themoviedb.org/3';
+const IMG = 'https://image.tmdb.org/t/p/';
+
+let currentModal = null;
+let currentSeason = 1;
+let currentEpisode = 1;
+let searchTimer = null;
+
+// ── Fetch helper ──────────────────────────────
+async function api(path) {
+  const sep = path.includes('?') ? '&' : '?';
+  const res = await fetch(`${BASE}${path}${sep}api_key=${API_KEY}&language=en-US`);
+  return res.json();
+}
+
+// ── Render a card ─────────────────────────────
+function makeCard(item, type) {
+  const mediaType = type || item.media_type || 'movie';
+  const title = item.title || item.name || 'Unknown';
+  const year = (item.release_date || item.first_air_date || '').slice(0,4);
+  const rating = item.vote_average ? item.vote_average.toFixed(1) : 'N/A';
+  const poster = item.poster_path
+    ? `<img src="${IMG}w342${item.poster_path}" alt="${title}" loading="lazy"/>`
+    : `<div class="card-poster-placeholder"><i class="fas fa-film"></i>${title}</div>`;
+
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.style.animationDelay = Math.random()*0.3+'s';
+  div.innerHTML = `
+    <div class="card-poster">
+      ${poster}
+      <span class="card-badge">${mediaType === 'tv' ? 'TV' : 'MOVIE'}</span>
+      <div class="card-overlay">
+        <div class="card-play-btn"><i class="fas fa-play"></i></div>
+        <div class="card-overlay-title">${title}</div>
+        <div class="card-overlay-meta">
+          <span class="star">&#9733;</span> ${rating}
+          ${year ? `<span style="color:var(--text3)">&#183;</span>${year}` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-title">${title}</div>
+      <div class="card-sub"><span class="star">&#9733;</span> ${rating} ${year ? '&#183; '+year : ''}</div>
+    </div>`;
+  div.onclick = () => openModal(item.id, mediaType);
+  return div;
+}
+
+function renderCards(containerId, items, type) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  if (!items || !items.length) {
+    el.innerHTML = '<div class="spinner-wrap">Nothing found.</div>';
+    return;
+  }
+  items.forEach(item => el.appendChild(makeCard(item, type)));
+}
+
+// ── Home page data ─────────────────────────────
+async function loadHome() {
+  // Hero - trending movie
+  const trending = await api('/trending/movie/day');
+  const hero = trending.results[0];
+  if (hero) setHero(hero, 'movie');
+
+  // Trending movies
+  renderCards('trending-movies', trending.results.slice(0,12), 'movie');
+
+  // Trending TV
+  const trendingTv = await api('/trending/tv/day');
+  renderCards('trending-tv', trendingTv.results.slice(0,12), 'tv');
+
+  // Top rated movies
+  const topRated = await api('/movie/top_rated');
+  renderCards('top-rated', topRated.results.slice(0,10), 'movie');
+
+  // Latest TV
+  const latestTv = await api('/tv/on_the_air');
+  renderCards('latest-tv', latestTv.results.slice(0,12), 'tv');
+}
+
+function setHero(item, type) {
+  const title = item.title || item.name;
+  const backdrop = item.backdrop_path ? `${IMG}original${item.backdrop_path}` : '';
+  document.getElementById('hero-bg').style.backgroundImage = `url('${backdrop}')`;
+  document.getElementById('hero-title').textContent = title;
+  document.getElementById('hero-desc').textContent = item.overview || '';
+
+  const year = (item.release_date || item.first_air_date || '').slice(0,4);
+  const rating = item.vote_average ? item.vote_average.toFixed(1) : '';
+  document.getElementById('hero-meta').innerHTML = `
+    ${rating ? `<span class="rating">&#9733; ${rating}</span><span class="dot"></span>` : ''}
+    ${year ? `<span>${year}</span><span class="dot"></span>` : ''}
+    <span class="quality-tag">HD</span>
+    <span>${type === 'tv' ? 'TV Series' : 'Movie'}</span>`;
+
+  document.getElementById('hero-watch-btn').onclick = () => openModal(item.id, type, true);
+  document.getElementById('hero-info-btn').onclick = () => openModal(item.id, type, false);
+}
+
+// ── Filter page ────────────────────────────────
+async function filterType(type) {
+  setActiveTab(type);
+  showPage('home-page');
+
+  const path = type === 'movie' ? '/movie/popular' : '/tv/popular';
+  const data = await api(path);
+
+  // Hide TV/extra sections, just show one big grid
+  document.getElementById('hero').style.display = 'none';
+
+  const section = document.querySelector('#home-page .section');
+  section.querySelector('.section-title').textContent = type === 'movie' ? 'All Movies' : 'All TV Shows';
+  renderCards('trending-movies', data.results, type);
+
+  // Hide other sections
+  const allSections = document.querySelectorAll('#home-page .section');
+  allSections.forEach((s, i) => s.style.display = i === 0 ? '' : 'none');
+}
+
+function showHomePage() {
+  setActiveTab('home');
+  document.getElementById('hero').style.display = '';
+  document.querySelectorAll('#home-page .section').forEach(s => s.style.display = '');
+  showPage('home-page');
+  loadHome();
+}
+
+function setActiveTab(type) {
+  document.querySelectorAll('.nav-tab').forEach((t,i) => {
+    t.classList.remove('active');
+    if ((type === 'home' && i===0)||(type==='movie'&&i===1)||(type==='tv'&&i===2)) t.classList.add('active');
+  });
+}
+
+// ── Modal ──────────────────────────────────────
+async function openModal(id, type, autoplay = false) {
+  currentModal = { id, type };
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Reset player
+  document.getElementById('modal-player-wrap').style.display = 'none';
+  document.getElementById('modal-backdrop').style.display = '';
+  document.getElementById('modal-player').src = '';
+  document.getElementById('seasons-wrap').style.display = 'none';
+
+  // Fetch details
+  const detail = await api(`/${type}/${id}`);
+  const title = detail.title || detail.name;
+  const year = (detail.release_date || detail.first_air_date || '').slice(0,4);
+  const rating = detail.vote_average ? detail.vote_average.toFixed(1) : 'N/A';
+  const runtime = detail.runtime ? `${detail.runtime}m` : detail.number_of_seasons ? `${detail.number_of_seasons} Season${detail.number_of_seasons>1?'s':''}` : '';
+
+  // Backdrop
+  if (detail.backdrop_path) {
+    document.getElementById('modal-backdrop').style.backgroundImage = `url('${IMG}w1280${detail.backdrop_path}')`;
+  }
+
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-desc').textContent = detail.overview || '';
+
+  document.getElementById('modal-meta').innerHTML = `
+    <span class="rating">&#9733; ${rating}</span>
+    <span class="dot"></span>
+    <span>${year}</span>
+    ${runtime ? `<span class="dot"></span><span>${runtime}</span>` : ''}
+    <span class="dot"></span>
+    <span class="tag">${type === 'tv' ? 'TV Series' : 'Movie'}</span>
+    <span class="tag">HD</span>`;
+
+  // Genres
+  const genresEl = document.getElementById('modal-genres');
+  genresEl.innerHTML = '';
+  if (detail.genres) {
+    detail.genres.forEach(g => {
+      const chip = document.createElement('span');
+      chip.className = 'genre-chip';
+      chip.textContent = g.name;
+      genresEl.appendChild(chip);
+    });
+  }
+
+  // Watch button
+  const watchBtn = document.getElementById('modal-watch-btn');
+  watchBtn.onclick = () => startPlay(id, type, 1, 1);
+
+  // TV: season/episode selector
+  if (type === 'tv' && detail.number_of_seasons) {
+    currentSeason = 1; currentEpisode = 1;
+    document.getElementById('seasons-wrap').style.display = '';
+    buildSeasons(id, detail.number_of_seasons);
+  }
+
+  if (autoplay) startPlay(id, type, currentSeason, currentEpisode);
+}
+
+async function buildSeasons(id, count) {
+  const seasonsRow = document.getElementById('seasons-row');
+  seasonsRow.innerHTML = '';
+  for (let s = 1; s <= count; s++) {
+    const btn = document.createElement('button');
+    btn.className = 'season-btn' + (s===1?' active':'');
+    btn.textContent = `S${s}`;
+    btn.onclick = () => selectSeason(id, s);
+    seasonsRow.appendChild(btn);
+  }
+  await buildEpisodes(id, 1);
+}
+
+async function selectSeason(id, season) {
+  currentSeason = season;
+  document.querySelectorAll('.season-btn').forEach((b,i) => {
+    b.classList.toggle('active', i+1===season);
+  });
+  await buildEpisodes(id, season);
+}
+
+async function buildEpisodes(id, season) {
+  const epsRow = document.getElementById('episodes-row');
+  epsRow.innerHTML = '<div class="spinner" style="width:24px;height:24px;margin:8px"></div>';
+  const data = await api(`/tv/${id}/season/${season}`);
+  const eps = data.episodes || [];
+  epsRow.innerHTML = '';
+  eps.forEach(ep => {
+    const btn = document.createElement('button');
+    btn.className = 'ep-btn' + (ep.episode_number===1?' active':'');
+    btn.textContent = ep.episode_number;
+    btn.title = ep.name;
+    btn.onclick = () => {
+      currentEpisode = ep.episode_number;
+      document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      startPlay(id, 'tv', currentSeason, ep.episode_number);
+    };
+    epsRow.appendChild(btn);
+  });
+}
+
+function startPlay(id, type, season, episode) {
+  const playerWrap = document.getElementById('modal-player-wrap');
+  const backdrop = document.getElementById('modal-backdrop');
+  const player = document.getElementById('modal-player');
+
+  let src = '';
+  if (type === 'movie') {
+    src = `https://vidsrc.to/embed/movie/${id}`;
+  } else {
+    src = `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
+  }
+
+  player.src = src;
+  backdrop.style.display = 'none';
+  playerWrap.style.display = '';
+  playerWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay') && !e.target.closest('#modal-close')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('modal-player').src = '';
+  document.body.style.overflow = '';
+}
+
+// ── Search ─────────────────────────────────────
+document.getElementById('search-input').addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  const q = this.value.trim();
+  if (!q) { showHomePage(); return; }
+  searchTimer = setTimeout(() => doSearch(q), 500);
+});
+
+async function doSearch(q) {
+  showPage('search-page');
+  document.getElementById('search-term-label').textContent = `"${q}"`;
+  document.getElementById('search-results').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+  const data = await api(`/search/multi?query=${encodeURIComponent(q)}`);
+  const filtered = (data.results || []).filter(r => r.media_type === 'movie' || r.media_type === 'tv');
+  renderCards('search-results', filtered, null);
+}
+
+// ── Page switcher ──────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── Init ───────────────────────────────────────
+loadHome();
+</script>
+</body>
+</html>
